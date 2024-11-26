@@ -1,7 +1,4 @@
-import sys
 import argparse
-
-
 import scheduler.scheduler as scheduler
 
 if __name__ == '__main__':

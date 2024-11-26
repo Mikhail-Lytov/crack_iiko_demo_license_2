@@ -1,11 +1,24 @@
 import requests
 import json
 import hashlib
+import logging
 
 URL_IIKO_BACKEND = ''
 USER_LOGIN = ""
 USER_PASSWORD = ""
 
+logger = logging.getLogger()
+
+def log():
+    logger.setLevel(logging.DEBUG)
+
+    file_handler = logging.FileHandler('crack_iikoRMS_demo_license.log', encoding='utf-8')
+    file_handler.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(formatter)
+
+    logger.addHandler(file_handler)
 
 def sha1_hash(string):
   """Вычисляет SHA-1 хеш строки."""
@@ -16,21 +29,21 @@ def sha1_hash(string):
 def get_auth():
     """Получить токен авторизации"""
     url = URL_IIKO_BACKEND + "/resto/api/auth"
-    print(url)
+    logger.info(url)
     params = {
         "login": USER_LOGIN,
         "pass": sha1_hash(USER_PASSWORD),
     }
 
     try:
-        print("Request: GET ", "\nparams: ", params)
+        logger.info("Request: GET " + "\nparams: " + str(params))
         response = requests.get(url, params=params)
-        print("Response: ", response)
+        logger.info("Response: " + str(response))
         response.raise_for_status()
 
         return response.content.decode('utf-8')
     except requests.exceptions.RequestException as e:
-        print(f"Ошибка при отправке запроса: {e}")
+        logger.error(f"Ошибка при отправке запроса: " + str(e.msg))
         return None
 
 def log_out(token):
@@ -41,12 +54,12 @@ def log_out(token):
     headers["Cookie"] = 'key=' + token
 
     try:
-        print("Request: GET ", "\nparams: ", "\nheaders: ", headers)
+        logger.error("Request: GET " + "\nparams: " + "\nheaders: " + str(headers))
         response = requests.get(url, headers=headers)
-        print("Response: ", response)
+        logger.error("Response: " + str(response))
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        print(f"Ошибка при отправке запроса: {e}")
+        logger.error(f"Ошибка при отправке запроса: " + str(e.msg))
         return None
 
 def get_document_by_filet(date_from, date_to, token, status=None, revision_from=-1):
@@ -68,17 +81,17 @@ def get_document_by_filet(date_from, date_to, token, status=None, revision_from=
 
         data = response.json()
 
-        print("Успешно получены данные:")
-        print(json.dumps(data, indent=2))
+        logger.info("Успешно получены данные:")
+        logger.info(str(json.dumps(data, indent=2)))
 
         return data
 
     except requests.exceptions.RequestException as e:
-        print(f"Ошибка при отправке запроса: {e}")
+        logger.error(f"Ошибка при отправке запроса: " + str(e.msg))
         return None
     except json.JSONDecodeError as e:
-        print(f"Ошибка при декодировании JSON: {e}")
-        print(f"Ответ сервера: {response.text}") #вывод сырого ответа для отладки
+        logger.error(f"Ошибка при декодировании JSON: " + str(e.msg))
+        logger.error(f"Ответ сервера: " + str(response.text))
         return None
 
 def create_new_document(token, dateIncoming, dateTo, productId, price):
@@ -90,6 +103,7 @@ def create_new_document(token, dateIncoming, dateTo, productId, price):
         "shortName": "",
         "deletePreviousMenu": False,
         "dateTo": dateTo,
+        "comment": "license activation",
         "items": [
             {
                 "num": 0,
@@ -111,16 +125,16 @@ def create_new_document(token, dateIncoming, dateTo, productId, price):
     headers["Content-Type"] = "application/json"
 
     try:
-        print("Request: POST ", "\nparams: ", " \nheaders: ", headers, " \ndata: ", json.dumps(menu_data))
+        logger.info("Request: POST " + "\nparams: " + " \nheaders: " + str (headers) + " \ndata: " + str(json.dumps(menu_data)))
         response = requests.post(url, headers=headers, data=json.dumps(menu_data))
-        print("Response: ", response)
+        logger.info("Response: " + str(response))
         response.raise_for_status()
-        print("JSON успешно отправлен. Код ответа:", response.status_code)
-        print("Ответ сервера:", response.json())
+        logger.info("JSON успешно отправлен. Код ответа:" + str(response.status_code))
+        logger.info("Ответ сервера:" + str(response.json()))
     except requests.exceptions.RequestException as e:
-        print(f"Ошибка при отправке JSON: {e}")
+        logger.error(f"Ошибка при отправке JSON: " + str(e.msg))
     except json.JSONDecodeError as e:
-        print(f"Ошибка декодирования JSON ответа: {e}")
+        logger.error(f"Ошибка декодирования JSON ответа: " + str(e.msg))
 
 def get_all_items(token):
     """Получить все объекты из backOffice"""
@@ -133,9 +147,9 @@ def get_all_items(token):
         return data
 
     except requests.exceptions.RequestException as e:
-        print(f"Ошибка при отправке запроса: {e}")
+        logger.error(f"Ошибка при отправке запроса: " + str(e.msg))
         return None
     except json.JSONDecodeError as e:
-        print(f"Ошибка при декодировании JSON: {e}")
-        print(f"Ответ сервера: {response.text}")
+        logger.error(f"Ошибка при декодировании JSON:" + str(e.msg))
+        logger.error(f"Ответ сервера:" + str(response.text))
         return None
