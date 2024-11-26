@@ -2,9 +2,9 @@ import requests
 import json
 import hashlib
 
-URL_IIKO_BACKEND = 'https://315-459-856.iiko.it'
-USER_LOGIN = "user"
-USER_PASSWORD = "user#test"
+URL_IIKO_BACKEND = ''
+USER_LOGIN = ""
+USER_PASSWORD = ""
 
 
 def sha1_hash(string):
@@ -16,6 +16,7 @@ def sha1_hash(string):
 def get_auth():
     """Получить токен авторизации"""
     url = URL_IIKO_BACKEND + "/resto/api/auth"
+    print(url)
     params = {
         "login": USER_LOGIN,
         "pass": sha1_hash(USER_PASSWORD),

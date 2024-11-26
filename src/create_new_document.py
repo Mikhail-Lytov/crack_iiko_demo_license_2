@@ -10,7 +10,12 @@ def get_product_id(response_json, product_name):
             return product.get('id'), product.get("defaultSalePrice")
     return None
 
-def create_new_document():
+def create_new_document(test_item, URL_IIKO_BACKEND, USER_LOGIN, USER_PASSWORD):
+    TEST_ITEM = test_item
+    api_iiko.URL_IIKO_BACKEND = URL_IIKO_BACKEND
+    api_iiko.USER_LOGIN = USER_LOGIN
+    api_iiko.USER_PASSWORD = USER_PASSWORD
+
     today = datetime.now() + timedelta(days=1)
     date_now = today.strftime("%Y-%m-%d")
 
