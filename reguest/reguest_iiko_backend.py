@@ -38,7 +38,7 @@ def log_out(token):
         print(f"Ошибка при отправке запроса: {e}")
         return None
 
-def get_orders(date_from, date_to, token, status=None, revision_from=-1):
+def get_document_by_filet(date_from, date_to, token, status=None, revision_from=-1):
     """
     Отправляет GET-запрос для получения списка приказов и выводит результат.
     """
@@ -81,6 +81,44 @@ def get_orders(date_from, date_to, token, status=None, revision_from=-1):
         print(f"Ответ сервера: {response.text}") #вывод сырого ответа для отладки
         return None
 
+def create_new_document(token):
+    url = "https://315-459-856.iiko.it/resto/api/v2/documents/menuChange"
+    menu_data = {
+        "dateIncoming": "2024-11-29",
+        "status": "NEW",
+        "shortName": "",
+        "deletePreviousMenu": False,
+        "dateTo": "2024-11-30",
+        "items": [
+            {
+                "num": 0,
+                "departmentId": "127b40f0-25ae-bf8e-018c-8b4efa610011",
+                "productId": "701ea0c8-19c3-4061-bc94-5f0b64389c26",
+                "productSizeId": None,
+                "including": True,
+                "price": 13,
+                "pricesForCategories": [],
+                "includeForCategories": [],
+                "flyerProgram": False,
+                "dishOfDay": False
+            }
+        ]
+    }
+
+    headers = {}
+    headers["Cookie"] = 'key=' + token
+    headers["Content-Type"] = "application/json"
+
+    try:
+        response = requests.post(url, headers=headers, data=json.dumps(menu_data))
+        response.raise_for_status()  # Проверка на ошибки HTTP (4xx или 5xx)
+        print("JSON успешно отправлен. Код ответа:", response.status_code)
+        print("Ответ сервера:", response.json())  # Вывод ответа сервера для проверки
+    except requests.exceptions.RequestException as e:
+        print(f"Ошибка при отправке JSON: {e}")
+    except json.JSONDecodeError as e:
+        print(f"Ошибка декодирования JSON ответа: {e}")
+
 
 if __name__ == "__main__":
     # Пример использования:
@@ -92,10 +130,11 @@ if __name__ == "__main__":
     date_to = today.strftime("%Y-%m-%d")
 
 
-    max_revision = get_orders(date_from, date_to, token, status="approved") # Замените "approved" на нужный статус или оставьте None
+    max_revision = get_document_by_filet(date_from, date_to, token, status="approved") # Замените "approved" на нужный статус или оставьте None
 
     if max_revision is not None:
         print(f"\nИспользуйте {max_revision} в качестве revisionFrom в следующем запросе.")
 
+    create_new_document(token)
     log_out(token)
     input("enter:")
