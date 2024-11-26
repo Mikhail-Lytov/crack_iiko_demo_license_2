@@ -81,22 +81,22 @@ def get_document_by_filet(date_from, date_to, token, status=None, revision_from=
         print(f"Ответ сервера: {response.text}") #вывод сырого ответа для отладки
         return None
 
-def create_new_document(token):
+def create_new_document(token, dateIncoming, dateTo, productId, price):
     url = "https://315-459-856.iiko.it/resto/api/v2/documents/menuChange"
     menu_data = {
-        "dateIncoming": "2024-11-29",
+        "dateIncoming": dateIncoming,
         "status": "NEW",
         "shortName": "",
         "deletePreviousMenu": False,
-        "dateTo": "2024-11-30",
+        "dateTo": dateTo,
         "items": [
             {
                 "num": 0,
                 "departmentId": "127b40f0-25ae-bf8e-018c-8b4efa610011",
-                "productId": "701ea0c8-19c3-4061-bc94-5f0b64389c26",
+                "productId": productId,
                 "productSizeId": None,
                 "including": True,
-                "price": 13,
+                "price": price,
                 "pricesForCategories": [],
                 "includeForCategories": [],
                 "flyerProgram": False,
@@ -119,6 +119,23 @@ def create_new_document(token):
     except json.JSONDecodeError as e:
         print(f"Ошибка декодирования JSON ответа: {e}")
 
+def get_all_items(token):
+    url = "https://315-459-856.iiko.it/resto/api/v2/entities/products/list?includeDeleted=false"
+    headers = {}
+    headers["Cookie"] = 'key=' + token
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        data = response.json()
+        return data
+
+    except requests.exceptions.RequestException as e:
+        print(f"Ошибка при отправке запроса: {e}")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Ошибка при декодировании JSON: {e}")
+        print(f"Ответ сервера: {response.text}") #вывод сырого ответа для отладки
+        return None
 
 if __name__ == "__main__":
     # Пример использования:
@@ -129,6 +146,7 @@ if __name__ == "__main__":
     date_from = yesterday.strftime("%Y-%m-%d")
     date_to = today.strftime("%Y-%m-%d")
 
+    print(get_all_items(token))
 
     max_revision = get_document_by_filet(date_from, date_to, token, status="approved") # Замените "approved" на нужный статус или оставьте None
 
