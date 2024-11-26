@@ -23,7 +23,9 @@ def get_auth():
     }
 
     try:
+        print("Request: GET ", "\nparams: ", params)
         response = requests.get(url, params=params)
+        print("Response: ", response)
         response.raise_for_status()
 
         return response.content.decode('utf-8')
@@ -39,7 +41,9 @@ def log_out(token):
     headers["Cookie"] = 'key=' + token
 
     try:
+        print("Request: GET ", "\nparams: ", "\nheaders: ", headers)
         response = requests.get(url, headers=headers)
+        print("Response: ", response)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         print(f"Ошибка при отправке запроса: {e}")
@@ -107,7 +111,9 @@ def create_new_document(token, dateIncoming, dateTo, productId, price):
     headers["Content-Type"] = "application/json"
 
     try:
+        print("Request: POST ", "\nparams: ", " \nheaders: ", headers, " \ndata: ", json.dumps(menu_data))
         response = requests.post(url, headers=headers, data=json.dumps(menu_data))
+        print("Response: ", response)
         response.raise_for_status()
         print("JSON успешно отправлен. Код ответа:", response.status_code)
         print("Ответ сервера:", response.json())
