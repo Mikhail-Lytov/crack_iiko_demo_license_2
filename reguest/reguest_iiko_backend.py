@@ -16,8 +16,27 @@ def get_auth():
         "pass": sha1_hash("user#test"),
     }
 
-    response = requests.get(url, params=params)
-    return response.content.decode('utf-8')
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+
+        return response.content.decode('utf-8')
+    except requests.exceptions.RequestException as e:
+        print(f"Ошибка при отправке запроса: {e}")
+        return None
+
+def log_out(token):
+    url = "https://315-459-856.iiko.it/resto/api/logout"
+
+    headers = {}
+    headers["Cookie"] = 'key=' + token
+
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Ошибка при отправке запроса: {e}")
+        return None
 
 def get_orders(date_from, date_to, token, status=None, revision_from=-1):
     """
@@ -78,4 +97,5 @@ if __name__ == "__main__":
     if max_revision is not None:
         print(f"\nИспользуйте {max_revision} в качестве revisionFrom в следующем запросе.")
 
+    log_out(token)
     input("enter:")
