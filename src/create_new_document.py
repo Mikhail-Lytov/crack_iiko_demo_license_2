@@ -6,7 +6,7 @@ TEST_ITEM = "Test beer"
 
 def get_product_id(response_json, product_name):
     for product in response_json:
-        if product.get('name') == product_name:  # Используем get() для безопасного доступа
+        if product.get('name') == product_name:
             return product.get('id'), product.get("defaultSalePrice")
     return None
 
