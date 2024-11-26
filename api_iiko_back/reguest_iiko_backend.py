@@ -54,9 +54,9 @@ def log_out(token):
     headers["Cookie"] = 'key=' + token
 
     try:
-        logger.error("Request: GET " + "\nparams: " + "\nheaders: " + str(headers))
+        logger.info("Request: GET " + "\nparams: " + "\nheaders: " + str(headers))
         response = requests.get(url, headers=headers)
-        logger.error("Response: " + str(response))
+        logger.info("Response: " + str(response))
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         logger.error(f"Ошибка при отправке запроса: " + str(e.msg))
