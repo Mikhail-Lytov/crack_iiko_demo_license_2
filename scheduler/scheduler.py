@@ -15,7 +15,7 @@ def start_scheduler(test_item, url_iiko, user_login, user_password, number_days_
     try:
         scheduler = BlockingScheduler()
         print("Scheduler days: ", number_days_scheduler)
-        scheduler.add_job(my_job, 'interval', weeks=0, days=number_days_scheduler, hours=0, minutes=0, seconds=10, args=[test_item, url_iiko, user_login, user_password])
+        scheduler.add_job(my_job, 'interval', weeks=0, days=number_days_scheduler, hours=0, minutes=0, seconds=0, args=[test_item, url_iiko, user_login, user_password])
 
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):
