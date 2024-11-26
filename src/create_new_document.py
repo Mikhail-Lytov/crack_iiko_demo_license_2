@@ -5,14 +5,13 @@ TEST_ITEM = "Test beer"
 
 
 def get_product_id(response_json, product_name):
-    """Извлекает ID продукта по его имени из JSON-ответа."""
     for product in response_json:
         if product.get('name') == product_name:  # Используем get() для безопасного доступа
             return product.get('id'), product.get("defaultSalePrice")
     return None
 
 def create_new_document():
-    today = datetime.now()
+    today = datetime.now() + timedelta(days=1)
     date_now = today.strftime("%Y-%m-%d")
 
     date_to = (today + timedelta(days=1)).strftime("%Y-%m-%d")

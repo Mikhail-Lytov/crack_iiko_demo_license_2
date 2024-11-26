@@ -1,19 +1,24 @@
 import requests
 import json
 import hashlib
-from datetime import datetime, timedelta
+
+URL_IIKO_BACKEND = 'https://315-459-856.iiko.it'
+USER_LOGIN = "user"
+USER_PASSWORD = "user#test"
+
 
 def sha1_hash(string):
   """Вычисляет SHA-1 хеш строки."""
   sha1 = hashlib.sha1()
-  sha1.update(string.encode('utf-8')) # Важно закодировать строку в байты
+  sha1.update(string.encode('utf-8'))
   return sha1.hexdigest()
 
 def get_auth():
-    url = "https://315-459-856.iiko.it/resto/api/auth"
+    """Получить токен авторизации"""
+    url = URL_IIKO_BACKEND + "/resto/api/auth"
     params = {
-        "login": "user",
-        "pass": sha1_hash("user#test"),
+        "login": USER_LOGIN,
+        "pass": sha1_hash(USER_PASSWORD),
     }
 
     try:
@@ -26,7 +31,8 @@ def get_auth():
         return None
 
 def log_out(token):
-    url = "https://315-459-856.iiko.it/resto/api/logout"
+    """Отвязать токен авторизации"""
+    url = URL_IIKO_BACKEND + "/resto/api/logout"
 
     headers = {}
     headers["Cookie"] = 'key=' + token
@@ -42,36 +48,25 @@ def get_document_by_filet(date_from, date_to, token, status=None, revision_from=
     """
     Отправляет GET-запрос для получения списка приказов и выводит результат.
     """
-    url = "https://315-459-856.iiko.it/resto/api/v2/documents/menuChange"  #  Замените на ваш полный URL, если это не локальный endpoint
+    url = URL_IIKO_BACKEND + "/resto/api/v2/documents/menuChange"
 
     params = {
         "dateFrom": date_from,
         "dateTo": date_to,
-        #"revisionFrom": revision_from,
     }
     headers = {}
     headers["Cookie"] = 'key=' + token
-    #if status:
-     #   params["status"] = status
 
     try:
         response = requests.get(url, params=params, headers=headers)
-        response.raise_for_status()  # Поднимает исключение для не-2xx кодов ответа
+        response.raise_for_status()
 
         data = response.json()
 
-        #Обработка результата.  Предполагается JSON ответ.  Измените, если формат другой.
         print("Успешно получены данные:")
-        print(json.dumps(data, indent=2)) #вывод отформатированного JSON
+        print(json.dumps(data, indent=2))
 
-        # Извлечение максимальной ревизии (если она присутствует в ответе)
-        if "revision" in data:
-            max_revision = data["revision"]
-            print(f"\nМаксимальная ревизия: {max_revision}")
-            return max_revision
-        else:
-          print("\nМаксимальная ревизия не найдена в ответе.")
-          return None
+        return data
 
     except requests.exceptions.RequestException as e:
         print(f"Ошибка при отправке запроса: {e}")
@@ -82,7 +77,8 @@ def get_document_by_filet(date_from, date_to, token, status=None, revision_from=
         return None
 
 def create_new_document(token, dateIncoming, dateTo, productId, price):
-    url = "https://315-459-856.iiko.it/resto/api/v2/documents/menuChange"
+    """Создание нового приказа в backOffice"""
+    url = URL_IIKO_BACKEND + "/resto/api/v2/documents/menuChange"
     menu_data = {
         "dateIncoming": dateIncoming,
         "status": "NEW",
@@ -111,18 +107,18 @@ def create_new_document(token, dateIncoming, dateTo, productId, price):
 
     try:
         response = requests.post(url, headers=headers, data=json.dumps(menu_data))
-        response.raise_for_status()  # Проверка на ошибки HTTP (4xx или 5xx)
+        response.raise_for_status()
         print("JSON успешно отправлен. Код ответа:", response.status_code)
-        print("Ответ сервера:", response.json())  # Вывод ответа сервера для проверки
+        print("Ответ сервера:", response.json())
     except requests.exceptions.RequestException as e:
         print(f"Ошибка при отправке JSON: {e}")
     except json.JSONDecodeError as e:
         print(f"Ошибка декодирования JSON ответа: {e}")
 
 def get_all_items(token):
-    url = "https://315-459-856.iiko.it/resto/api/v2/entities/products/list?includeDeleted=false"
-    headers = {}
-    headers["Cookie"] = 'key=' + token
+    """Получить все объекты из backOffice"""
+    url = URL_IIKO_BACKEND + "/resto/api/v2/entities/products/list?includeDeleted=false"
+    headers = {"Cookie": 'key=' + token}
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
@@ -134,25 +130,5 @@ def get_all_items(token):
         return None
     except json.JSONDecodeError as e:
         print(f"Ошибка при декодировании JSON: {e}")
-        print(f"Ответ сервера: {response.text}") #вывод сырого ответа для отладки
+        print(f"Ответ сервера: {response.text}")
         return None
-
-if __name__ == "__main__":
-    # Пример использования:
-    token = get_auth()
-    today = datetime.now()
-    yesterday = today - timedelta(days=30)
-    today = today + timedelta(days=10)
-    date_from = yesterday.strftime("%Y-%m-%d")
-    date_to = today.strftime("%Y-%m-%d")
-
-    print(get_all_items(token))
-
-    max_revision = get_document_by_filet(date_from, date_to, token, status="approved") # Замените "approved" на нужный статус или оставьте None
-
-    if max_revision is not None:
-        print(f"\nИспользуйте {max_revision} в качестве revisionFrom в следующем запросе.")
-
-    create_new_document(token)
-    log_out(token)
-    input("enter:")
