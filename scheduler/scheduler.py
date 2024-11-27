@@ -21,13 +21,12 @@ def my_job(test_item, url_iiko, user_login, user_password):
     create_new_document.create_new_document(test_item, url_iiko, user_login, user_password)
     logger.info("end license update time:" + str(datetime.now()))
 
-def start_scheduler(test_item, url_iiko, user_login, user_password, number_days_scheduler):
+def start_scheduler(test_item, url_iiko, user_login, user_password):
     log()
     global scheduler
     try:
         scheduler = BlockingScheduler()
-        logger.info("Scheduler days: " + str(number_days_scheduler))
-        scheduler.add_job(my_job, 'interval', weeks=0, days=number_days_scheduler, hours=0, minutes=0, seconds=10, args=[test_item, url_iiko, user_login, user_password])
+        scheduler.add_job(my_job, 'cron', day='12,28', hour=1, minute=10, args=[test_item, url_iiko, user_login, user_password])
 
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):
