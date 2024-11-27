@@ -1,14 +1,25 @@
-import argparse
 import scheduler.scheduler as scheduler
+import yaml
+import os
+
+def load_yaml(filepath):
+    try:
+        with open(filepath, 'r') as file:
+            data = yaml.safe_load(file)
+            return data
+    except FileNotFoundError:
+        print(f"Файл {filepath} не найден.")
+        return None
+    except yaml.YAMLError as e:
+        print(f"Ошибка при чтении YAML файла: {e}")
+        return None
+
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description="Параметры запуска")
-    parser.add_argument("--item_test", type=str, help="Поле для поиска", required=True)
-    parser.add_argument("--url_iiko", type=str, help="url iiko", required=True)
-    parser.add_argument("--url_login", type=str, help="Имя системного пользователя в iiko", required=True)
-    parser.add_argument("--url_password", type=str, help="Пароль системного пользователя в iiko", required=True)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    yaml_path = os.path.join(current_dir, "config.yml")
 
-    args = parser.parse_args()
+    config = load_yaml(yaml_path)
 
-    scheduler.start_scheduler(args.item_test, args.url_iiko, args.url_login, args.url_password)
+    scheduler.start_scheduler(config["item_test"], config["url_iiko"], config["url_login"], config["url_password"])
