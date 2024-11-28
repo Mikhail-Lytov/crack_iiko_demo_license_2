@@ -1,4 +1,4 @@
-import scheduler.scheduler as scheduler
+import src.create_new_document as create_new_document
 import yaml
 import os
 import logging
@@ -37,4 +37,4 @@ if __name__ == '__main__':
 
     config = load_yaml(yaml_path)
 
-    scheduler.start_scheduler(config["item_test"], config["url_iiko"], config["url_login"], config["url_password"])
+    create_new_document.create_new_document(config["item_test"], config["url_iiko"], config["url_login"], config["url_password"])

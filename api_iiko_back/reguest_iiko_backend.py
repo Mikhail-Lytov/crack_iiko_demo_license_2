@@ -43,8 +43,8 @@ def get_auth():
 
         return response.content.decode('utf-8')
     except requests.exceptions.RequestException as e:
-        logger.error(f"Ошибка при отправке запроса: " + str(e.msg))
-        return None
+        logger.error("Ошибка при отправке запроса: " + str(e))
+        exit(1)
 
 def log_out(token):
     """Отвязать токен авторизации"""
@@ -59,7 +59,7 @@ def log_out(token):
         logger.info("Response: " + str(response))
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        logger.error(f"Ошибка при отправке запроса: " + str(e.msg))
+        logger.error(f"Ошибка при отправке запроса: " + str(e))
         return None
 
 def get_document_by_filet(date_from, date_to, token, status=None, revision_from=-1):
@@ -87,7 +87,7 @@ def get_document_by_filet(date_from, date_to, token, status=None, revision_from=
         return data
 
     except requests.exceptions.RequestException as e:
-        logger.error(f"Ошибка при отправке запроса: " + str(e.msg))
+        logger.error(f"Ошибка при отправке запроса: " + str(e))
         return None
     except json.JSONDecodeError as e:
         logger.error(f"Ошибка при декодировании JSON: " + str(e.msg))
@@ -132,7 +132,7 @@ def create_new_document(token, dateIncoming, dateTo, productId, price):
         logger.info("JSON успешно отправлен. Код ответа:" + str(response.status_code))
         logger.info("Ответ сервера:" + str(response.json()))
     except requests.exceptions.RequestException as e:
-        logger.error(f"Ошибка при отправке JSON: " + str(e.msg))
+        logger.error(f"Ошибка при отправке JSON: " + str(e))
     except json.JSONDecodeError as e:
         logger.error(f"Ошибка декодирования JSON ответа: " + str(e.msg))
 
@@ -147,7 +147,7 @@ def get_all_items(token):
         return data
 
     except requests.exceptions.RequestException as e:
-        logger.error(f"Ошибка при отправке запроса: " + str(e.msg))
+        logger.error(f"Ошибка при отправке запроса: " + str(e))
         return None
     except json.JSONDecodeError as e:
         logger.error(f"Ошибка при декодировании JSON:" + str(e.msg))
